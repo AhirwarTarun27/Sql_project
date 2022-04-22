@@ -14,7 +14,17 @@ const getUser = async () => {
   return UserModel.findAll();
 };
 
+const findUser = async (id) => {
+  return UserModel.findOne({ where: { id } });
+};
+
+const updateVarifiedStatus = async (id) => {
+  return UserModel.update({ isVarified: true }, { where: { id } });
+};
+
 module.exports = {
   createUser,
   getUser,
+  updateVarifiedStatus,
+  findUser,
 };
