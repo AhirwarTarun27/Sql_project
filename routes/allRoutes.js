@@ -8,9 +8,11 @@ const {
   getUser,
   updateVerifiedStatus,
   findUser,
+  findEmail,
 } = require("../controllers/user.controller");
 const sendEmail = require("../configs/email");
 const { token, verifyToken } = require("../configs/token");
+const bcrypt = require("bcryptjs/dist/bcrypt");
 
 userRouter.route("/addUserData").post(async (req, res) => {
   try {
@@ -52,6 +54,37 @@ userRouter.route("/user_verification/:token").get(async (req, res) => {
       return res.send({
         message: "Invalid Link",
       });
+    }
+  } catch (error) {
+    throw error;
+  }
+});
+
+userRouter.route("/login").post(async (req, res) => {
+  try {
+    const email = req.body.email;
+    const user = await findEmail(email);
+    // console.log(user.dataValues.email);
+    if (user) {
+      if (user.dataValues.isVerified) {
+        const unhashedPassword = req.body.password;
+        const hashedPassword = user.dataValues.password;
+
+        const actualPassword = () => {
+          return bcrypt.compareSync(unhashedPassword, hashedPassword);
+        };
+
+        if (actualPassword()) {
+          const newToken = token(user);
+          return res.send({ user, newToken }).status(200);
+        } else {
+          return res.send({
+            message: "Incorrect password",
+          });
+        }
+      } else {
+        return res.send({ message: "User is not verified" });
+      }
     }
   } catch (error) {
     throw error;

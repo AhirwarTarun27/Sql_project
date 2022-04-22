@@ -22,9 +22,14 @@ const updateVerifiedStatus = async (id) => {
   return UserModel.update({ isVerified: true }, { where: { id } });
 };
 
+const findEmail = async (email) => {
+  return UserModel.findOne({ where: { email } });
+};
+
 module.exports = {
   createUser,
   getUser,
   updateVerifiedStatus,
   findUser,
+  findEmail,
 };
