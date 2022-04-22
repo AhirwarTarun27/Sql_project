@@ -6,7 +6,7 @@ const userRouter = express.Router();
 const {
   createUser,
   getUser,
-  updateVarifiedStatus,
+  updateVerifiedStatus,
   findUser,
 } = require("../controllers/user.controller");
 const sendEmail = require("../configs/email");
@@ -42,7 +42,7 @@ userRouter.route("/user_verification/:token").get(async (req, res) => {
       const userId = await findUser(auth.user.id);
 
       //updating status of user
-      const updatedUser = await updateVarifiedStatus(userId);
+      const updatedUser = await updateVerifiedStatus(userId.id);
 
       return res.send({
         newUser: updatedUser,

@@ -32,7 +32,7 @@ const StudentModel = db.define("studentData", {
     type: Sequelize.INTEGER,
     allowNull: false,
   },
-  ifVarified: {
+  isVerified: {
     type: Sequelize.BOOLEAN,
     allowNull: false,
     defaultValue: false,
