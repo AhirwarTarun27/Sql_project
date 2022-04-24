@@ -26,10 +26,20 @@ const findEmail = async (email) => {
   return UserModel.findOne({ where: { email } });
 };
 
+const updateFields = async (id, updatedValue) => {
+  return UserModel.update(updatedValue, { where: { id } });
+};
+
+const resetPassword = async (id, newPass) => {
+  return UserModel.update({ password: newPass }, { where: { id } });
+};
+
 module.exports = {
   createUser,
   getUser,
   updateVerifiedStatus,
   findUser,
   findEmail,
+  updateFields,
+  resetPassword,
 };

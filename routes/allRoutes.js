@@ -1,5 +1,5 @@
 const express = require("express");
-const UserModel = require("../models/user.model");
+const authorization = require("../middlewares/authorization");
 
 const userRouter = express.Router();
 
@@ -9,6 +9,7 @@ const {
   updateVerifiedStatus,
   findUser,
   findEmail,
+  updateFields,
 } = require("../controllers/user.controller");
 const sendEmail = require("../configs/email");
 const { token, verifyToken } = require("../configs/token");
@@ -86,6 +87,29 @@ userRouter.route("/login").post(async (req, res) => {
         return res.send({ message: "User is not verified" });
       }
     }
+  } catch (error) {
+    throw error;
+  }
+});
+
+userRouter.route("/updateData").patch(authorization, async (req, res) => {
+  try {
+    const id = req.user.user.id;
+    const newUser = req.body;
+    // console.log("id:", id);
+    // console.log(req.user);
+
+    // console.log("newUser:", newUser);
+
+    if (id && newUser) {
+      const updateUser = await updateFields(id, newUser);
+
+      res.send(updateUser).status(200);
+    } else {
+      return res.send({ message: "Please provide valid data" });
+    }
+
+    console.log(id, newUser);
   } catch (error) {
     throw error;
   }
