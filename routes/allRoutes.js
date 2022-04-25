@@ -1,5 +1,7 @@
 const express = require("express");
 const authorization = require("../middlewares/authorization");
+const jwt = require("jsonwebtoken");
+require("dotenv").config();
 const userRouter = express.Router();
 const {
   createUser,
@@ -78,7 +80,8 @@ userRouter.route("/login").post(async (req, res) => {
 
         if (actualPassword()) {
           const newToken = token(user);
-          return res.send({ user, newToken }).status(200);
+          // const refreshToken = jwt.sign(user,process.env.REFRESH_TOKEN_SECRET);
+          // return res.send({ user, newToken, refreshToken}).status(200);
         } else {
           return res.send({
             message: "Incorrect password",
