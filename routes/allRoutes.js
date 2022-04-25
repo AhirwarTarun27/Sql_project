@@ -1,8 +1,6 @@
 const express = require("express");
 const authorization = require("../middlewares/authorization");
-
 const userRouter = express.Router();
-
 const {
   createUser,
   getUser,
@@ -10,8 +8,9 @@ const {
   findUser,
   findEmail,
   updateFields,
+  resetPassword,
 } = require("../controllers/user.controller");
-const sendEmail = require("../configs/email");
+const { sendEmail, sendResetPassLink } = require("../configs/email");
 const { token, verifyToken } = require("../configs/token");
 const bcrypt = require("bcryptjs/dist/bcrypt");
 
@@ -69,7 +68,9 @@ userRouter.route("/login").post(async (req, res) => {
     if (user) {
       if (user.dataValues.isVerified) {
         const unhashedPassword = req.body.password;
+        // console.log("unhashedPassword:", unhashedPassword);
         const hashedPassword = user.dataValues.password;
+        // console.log("hashedPassword:", hashedPassword);
 
         const actualPassword = () => {
           return bcrypt.compareSync(unhashedPassword, hashedPassword);
@@ -110,6 +111,61 @@ userRouter.route("/updateData").patch(authorization, async (req, res) => {
     }
 
     console.log(id, newUser);
+  } catch (error) {
+    throw error;
+  }
+});
+
+userRouter.route("/changePassword").post(async (req, res) => {
+  try {
+    const email = req.body.email;
+    const oldPass = req.body.oldPassword;
+    const newPass = req.body.newPassword;
+    if (email && oldPass && newPass) {
+      const user = await findEmail(email);
+      const passwordInDb = user.dataValues.password;
+
+      const orignalPassword = () => {
+        return bcrypt.compareSync(oldPass, passwordInDb);
+      };
+
+      if (orignalPassword) {
+        const newToken = token(user);
+        const email = user.email;
+
+        sendResetPassLink(email, newToken);
+        return res.send({ message: "Reset link sent to the email" });
+      } else {
+        return res.send({ message: "old password in not correct" });
+      }
+    } else {
+      return res.send({ message: "Invalid credentials" });
+    }
+  } catch (error) {
+    throw error;
+  }
+});
+
+userRouter.route("/resetPassword").patch(authorization, async (req, res) => {
+  try {
+    const userId = req.user.user.id;
+    const user = await findUser(userId);
+    const newPass = req.body.newPassword;
+
+    if (user) {
+      const encryptPassword = (password) => {
+        if (password) {
+          const hashed = bcrypt.hashSync(password, 12);
+          return hashed;
+        }
+      };
+
+      const updatedPass = await resetPassword(userId, encryptPassword(newPass));
+
+      return res.send(updatedPass);
+    } else {
+      return res.send({ message: "link is not valid" });
+    }
   } catch (error) {
     throw error;
   }
