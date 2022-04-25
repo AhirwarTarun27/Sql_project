@@ -20,7 +20,7 @@ userRouter.route("/addUserData").post(async (req, res) => {
   try {
     const user = await createUser(req.body);
     console.log(req.body.email);
-    var newToken = token(user);
+    const newToken = token(user);
     sendEmail(req.body.email, newToken);
     res.status(201).send({ user, newToken });
   } catch (error) {
